@@ -6,7 +6,6 @@ torch ops replaced with numpy ops to avoid adding a torch dependency to proteus
 This is slow and should be translated to work with tiktoken, huggingface tokenizer, or custom rust code
 """
 
-import gzip
 import html
 import os
 from functools import lru_cache
@@ -21,7 +20,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 @lru_cache
 def default_bpe():
     return os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "bpe_simple_vocab_16e6.txt.gz"
+        os.path.dirname(os.path.abspath(__file__)), "bpe_simple_vocab_16e6.txt"
     )
 
 
@@ -82,7 +81,7 @@ class SimpleTokenizer:
     ):
         self.byte_encoder = bytes_to_unicode()
         self.byte_decoder = {v: k for k, v in self.byte_encoder.items()}
-        merges = gzip.open(bpe_path).read().decode("utf-8").split("\n")
+        merges = open(bpe_path, encoding="utf-8").read().split("\n")
         merges = merges[1 : 49152 - 256 - 2 + 1]
         merges = [tuple(merge.split()) for merge in merges]
         vocab = list(bytes_to_unicode().values())

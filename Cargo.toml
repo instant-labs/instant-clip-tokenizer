@@ -1,0 +1,25 @@
+[package]
+name = "instant-clip-tokenizer"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.65"
+
+[features]
+default = ["openai-vocabulary-file"]
+openai-vocabulary-file = []
+
+[[example]]
+name = "tokenize"
+required-features = ["openai-vocabulary-file"]
+
+[dependencies]
+ahash = "0.8.6"
+regex = "1.10.2"
+
+[dev-dependencies]
+criterion = "0.5.1"
+
+[[bench]]
+name = "bench"
+required-features = ["openai-vocabulary-file"]
+harness = false
