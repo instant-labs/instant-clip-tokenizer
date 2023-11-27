@@ -170,6 +170,8 @@ impl Tokenizer {
 
         let word_split = Regex::new(
             r"(?x)
+                # Special substrings - these each get encoded as a single marker token
+                <start_of_text>|<end_of_text>|
                 # Common english contractions
                 's|'t|'re|'ve|'m|'ll|'d|
                 # Consecutive letters, single numbers, or runs of special chars
@@ -216,6 +218,14 @@ impl Tokenizer {
         out.reserve(text.as_bytes().len());
         let words = self.word_split.find_iter(&text).map(|m| m.as_str());
         for word in words {
+            if word == "<start_of_text>" {
+                out.push(self.start_of_text());
+                continue;
+            } else if word == "<end_of_text>" {
+                out.push(self.end_of_text());
+                continue;
+            }
+
             let start_index = out.len();
             out.extend(
                 word.as_bytes()
@@ -223,7 +233,8 @@ impl Tokenizer {
                     .map(|b| self.byte_to_token[usize::from(*b)]),
             );
             if start_index < out.len() {
-                // If we added anything, mark last character as end-of-word token
+                // If we added anything, mark last character as end-of-word
+                // token
                 out.last_mut().unwrap().0 += 256;
             }
             self.apply_merge_rules(start_index, out);
@@ -424,10 +435,33 @@ mod tests {
     }
 
     #[test]
+    fn encode_start_and_end_of_text() {
+        let tokens = encode("<start_of_text>Hi<start_of_text>instant labs<end_of_text>");
+        assert_eq!(tokens, [49406, 1883, 49406, 10635, 12021, 49407].map(Token));
+    }
+
+    #[test]
+    fn encode_start_and_end_of_text_with_special_char() {
+        let tokens = encode("<start_of_text>Hi!<end_of_text>");
+        // Note how the "<end_of_text>" substring is not encoded as the special
+        // marker token (which would be 49407), because the word-splitting regex
+        // does not split it as a separate word due to the exclamation mark
+        // preceeding it. This behavior is somewhat strange, but we preserve it
+        // in order to stay compatible with the original Python implementation.
+        assert_eq!(
+            tokens,
+            [49406, 1883, 0, 283, 806, 318, 539, 318, 4160, 285].map(Token)
+        );
+    }
+
+    #[test]
     fn decode_start_and_end_of_text() {
         let tokenizer = Tokenizer::new();
-        let decoded = tokenizer.decode(&[49406, 10635, 12021, 49407].map(Token));
-        assert_eq!(decoded, "<start_of_text>instant labs <end_of_text>");
+        let decoded = tokenizer.decode(&[49406, 1883, 49406, 10635, 12021, 49407].map(Token));
+        assert_eq!(
+            decoded,
+            "<start_of_text>hi <start_of_text>instant labs <end_of_text>"
+        );
     }
 
     fn encode(input: &str) -> Vec<Token> {
