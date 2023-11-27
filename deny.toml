@@ -1,0 +1,10 @@
+[advisories]
+unsound = "deny"
+yanked = "deny"
+unmaintained = "deny"
+
+[licenses]
+allow-osi-fsf-free = "either"
+copyleft = "deny"
+private = { ignore = true }
+allow = []
