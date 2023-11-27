@@ -168,8 +168,14 @@ impl Tokenizer {
             .map(|(string, token)| (token, string.chars().map(|ch| byte_decoder[&ch]).collect()))
             .collect();
 
-        let word_split =
-            Regex::new(r"'s|'t|'re|'ve|'m|'ll|'d|[\p{L}]+|[\p{N}]|[^\s\p{L}\p{N}]+").unwrap();
+        let word_split = Regex::new(
+            r"(?x)
+                # Common english contractions
+                's|'t|'re|'ve|'m|'ll|'d|
+                # Consecutive letters, single numbers, or runs of special chars
+                [\p{L}]+|[\p{N}]|[^\s\p{L}\p{N}]+",
+        )
+        .unwrap();
 
         Ok(Tokenizer {
             byte_to_token,
