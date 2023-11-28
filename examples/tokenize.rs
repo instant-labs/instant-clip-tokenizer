@@ -14,11 +14,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     tokenizer.encode(&input, &mut tokens);
     let tokens_readable = tokens
         .iter()
-        .map(|token| tokenizer.decode(&[*token]))
+        .map(|token| tokenizer.decode([*token]))
         .collect::<Vec<_>>();
     println!("Result: {tokens:?} <-> {tokens_readable:?}");
 
-    let decoded = tokenizer.decode(&tokens);
+    let decoded = tokenizer.decode(tokens);
     println!("Decoded: \"{decoded}\"");
 
     Ok(())
