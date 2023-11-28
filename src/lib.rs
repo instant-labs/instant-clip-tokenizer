@@ -41,15 +41,21 @@
 //!
 //! # Crate features
 //!
-//! This crate provides one feature named `openai-vocabulary-file`. This feature
-//! bundles the default vocabulary file used for OpenAI's CLIP model together
-//! with this crate and allows users to construct a new tokenizer simply by
-//! calling [`Tokenizer::new`].
+//! This crate provides two features:
 //!
-//! This feature is enabled by default. To disable it use `default-features =
-//! false` when specifying the dependency on this crate in your `Cargo.toml`.
-//! You will need to supply your own vocabulary file then and construct the
-//! tokenizer using [`Tokenizer::with_vocabulary`].
+//! * **ndarray** - Enables the [`ndarray`](https://docs.rs/ndarray) dependency
+//!   and the `Tokenizer::tokenize_batch` method that can be used to tokenize
+//!   several input strings at once, returning a matrix suitable for directly
+//!   passing to the CLIP neural network.
+//! * **openai-vocabulary-file** - This feature bundles the default vocabulary
+//!   file used for OpenAI's CLIP model together with this crate and allows
+//!   users to construct a new tokenizer simply by calling [`Tokenizer::new`].
+//!   When disabled, you will need to supply your own vocabulary file and
+//!   construct the tokenizer using [`Tokenizer::with_vocabulary`].
+//!
+//! The **openai-vocabulary-file** feature is enabled by default. To disable it
+//! use `default-features = false` when specifying the dependency on this crate
+//! in your `Cargo.toml`.
 
 use std::io::{self, BufRead};
 
@@ -189,6 +195,70 @@ impl Tokenizer {
         })
     }
 
+    /// Tokenize a batch of multiple input strings.
+    ///
+    /// Each given input string is encoded using the [`encode`] method and the
+    /// numeric representation written to a row in the resulting two-dimensional
+    /// matrix of shape `(texts.len(), context_length)`, with the special
+    /// `<start_of_text>` token prepended, and `<end_of_text>` appended to each
+    /// text.
+    ///
+    /// The individual input strings are lowercased before being tokenized, but
+    /// otherwise no pre-processing is performed.
+    ///
+    /// `context_length` is the maximum number of tokens per each text and
+    /// should be `77` for all current CLIP models. If tokenization results in
+    /// less than `context_length` tokens the resulting row will be padded with
+    /// trailing zeros. If tokenizing an input text results in too many tokens,
+    /// the token sequence will be truncated to fit within the resulting row of
+    /// length `context_length`, always including the `<start_of_text>` and
+    /// `<end_of_text>` marker tokens.
+    ///
+    /// The resulting matrix can be passed directly to the CLIP neural network.
+    ///
+    /// [`encode`]: Tokenizer::encode
+    ///
+    /// # Panics
+    ///
+    /// Panics if `context_length < 3`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use ndarray::array;
+    /// # use instant_clip_tokenizer::{Token, Tokenizer};
+    /// let tokenizer = Tokenizer::new();
+    /// let encoded = tokenizer.tokenize_batch(["Hi", "How are you?"], 5);
+    /// assert_eq!(encoded, array![
+    ///     [49406, 1883, 49407, 0, 0],
+    ///     [49406, 829, 631, 592, 49407],
+    /// ]);
+    /// ```
+    #[cfg(feature = "ndarray")]
+    pub fn tokenize_batch<'a, I>(&self, texts: I, context_length: usize) -> ndarray::Array2<u16>
+    where
+        I: IntoIterator<Item = &'a str>,
+        I::IntoIter: std::iter::ExactSizeIterator,
+    {
+        if context_length < 3 {
+            panic!("context length must be at least 3");
+        }
+        let texts = texts.into_iter();
+        let mut result = ndarray::Array2::zeros((texts.len(), context_length));
+        let mut tokens = Vec::with_capacity(context_length);
+        for (text, mut result_row) in texts.zip(result.rows_mut()) {
+            tokens.clear();
+            tokens.push(self.start_of_text());
+            self.encode(text, &mut tokens);
+            tokens.truncate(context_length - 1);
+            tokens.push(self.end_of_text());
+            for (token, result_element) in tokens.iter().zip(&mut result_row) {
+                *result_element = token.to_u16();
+            }
+        }
+        result
+    }
+
     /// Encode a `text` input as a sequence of tokens.
     ///
     /// The resulting tokens are appended to `out`. `text` is lowercased before
@@ -196,8 +266,9 @@ impl Tokenizer {
     ///
     /// The encoded token sequence does not include the special
     /// `<start_of_text>` and `<end_of_text>` marker tokens. When these are
-    /// needed they have to be added manually by the caller using the
-    /// [`start_of_text`] and [`end_of_text`] methods, as in the example below.
+    /// needed you can either use the `tokenize_batch` method instead, or add
+    /// them manually by using the [`start_of_text`] and [`end_of_text`]
+    /// methods, as in the example below.
     ///
     /// [`start_of_text`]: Tokenizer::start_of_text
     /// [`end_of_text`]: Tokenizer::end_of_text
@@ -360,6 +431,19 @@ impl Token {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[cfg(feature = "ndarray")]
+    #[test]
+    fn tokenize_batch() {
+        let tokenizer = Tokenizer::new();
+        let encoded = tokenizer.tokenize_batch(["Hi", "How are you?", "I'm fine, thanks!"], 6);
+        let expected = ndarray::array![
+            [49406, 1883, 49407, 0, 0, 0],
+            [49406, 829, 631, 592, 286, 49407],
+            [49406, 328, 880, 3797, 267, 49407],
+        ];
+        assert_eq!(encoded, expected);
+    }
 
     #[test]
     fn encode_special_chars() {
