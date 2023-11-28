@@ -26,6 +26,18 @@ jobs:
           toolchain: ${{ matrix.rust }}
       - run: cargo test --all-features
 
+  test-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo build -p instant-clip-tokenizer-py --release
+      - name: Test Python bindings
+        run: |
+          cp target/release/libinstant_clip_tokenizer.so instant-clip-tokenizer-py/test/instant_clip_tokenizer.so
+          pip3 install numpy
+          PYTHONPATH=instant-clip-tokenizer-py/test/ python3 -m test
+
   lint:
     runs-on: ubuntu-latest
     steps:
