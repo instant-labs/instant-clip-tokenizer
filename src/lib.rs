@@ -344,6 +344,11 @@ impl Default for Tokenizer {
 pub struct Token(u16);
 
 impl Token {
+    /// Create `Token` from number, validating against the given `tokenizer`.
+    pub fn from_u16(token: u16, tokenizer: &Tokenizer) -> Option<Self> {
+        (token <= tokenizer.end_of_text().0).then_some(Self(token))
+    }
+
     /// Returns the numerical representation of this `Token`.
     ///
     /// The resulting number is suitable for feeding into a neural network.
