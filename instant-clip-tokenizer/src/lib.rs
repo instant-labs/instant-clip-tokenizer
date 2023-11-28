@@ -28,7 +28,7 @@
 //! # use std::io::{self, BufReader};
 //! # use instant_clip_tokenizer::{Token, Tokenizer};
 //! # fn main() -> io::Result<()> {
-//! let f = BufReader::new(File::open("bpe_simple_vocab_16e6.txt")?);
+//! let f = BufReader::new(File::open("../bpe_simple_vocab_16e6.txt")?);
 //! let tokenizer = Tokenizer::with_vocabulary(f, 50_000)?;
 //! let mut tokens = vec![tokenizer.start_of_text()];
 //! tokenizer.encode("Hi there", &mut tokens);
@@ -82,7 +82,7 @@ impl Tokenizer {
     /// model.
     #[cfg(any(test, feature = "openai-vocabulary-file"))]
     pub fn new() -> Tokenizer {
-        static VOCABULARY_DATA: &str = include_str!("../bpe_simple_vocab_16e6.txt");
+        static VOCABULARY_DATA: &str = include_str!("../../bpe_simple_vocab_16e6.txt");
         const MAX_VOCABULARY_SIZE: u16 = 49408;
         Tokenizer::with_vocabulary(io::Cursor::new(VOCABULARY_DATA), MAX_VOCABULARY_SIZE)
             .expect("bundled vocabulary data is valid")
