@@ -284,19 +284,19 @@ impl Tokenizer {
     /// let tokenizer = Tokenizer::new();
     /// let mut tokens = Vec::new();
     /// tokenizer.encode("Hello world!!!", &mut tokens);
-    /// let decoded = tokenizer.decode(&tokens);
+    /// let decoded = tokenizer.decode(tokens);
     /// assert_eq!(decoded, "hello world !!! ");
     /// ```
-    pub fn decode(&self, tokens: &[Token]) -> String {
+    pub fn decode(&self, tokens: impl IntoIterator<Item = Token>) -> String {
         let bytes = tokens
-            .iter()
+            .into_iter()
             .flat_map(|token| {
-                if *token == self.start_of_text {
+                if token == self.start_of_text {
                     "<start_of_text>".as_bytes()
-                } else if *token == self.end_of_text {
+                } else if token == self.end_of_text {
                     "<end_of_text>".as_bytes()
                 } else {
-                    &self.decoder[token]
+                    &self.decoder[&token]
                 }
             })
             .copied()
@@ -365,7 +365,7 @@ mod tests {
     #[test]
     fn decode_special_chars() {
         let tokenizer = Tokenizer::new();
-        let decoded = tokenizer.decode(&[Token(3306), Token(1002), Token(995)]);
+        let decoded = tokenizer.decode([Token(3306), Token(1002), Token(995)]);
         assert_eq!(decoded, "hello world !!! ");
     }
 
@@ -378,7 +378,7 @@ mod tests {
     #[test]
     fn decode_apostrophe() {
         let tokenizer = Tokenizer::new();
-        let decoded = tokenizer.decode(&[Token(328), Token(1200), Token(2041), Token(585)]);
+        let decoded = tokenizer.decode([Token(328), Token(1200), Token(2041), Token(585)]);
         assert_eq!(decoded, "i 've seen it ");
     }
 
@@ -391,7 +391,7 @@ mod tests {
     #[test]
     fn decode_short() {
         let tokenizer = Tokenizer::new();
-        let decoded = tokenizer.decode(&[Token(3306), Token(65), Token(23176), Token(16485)]);
+        let decoded = tokenizer.decode([Token(3306), Token(65), Token(23176), Token(16485)]);
         assert_eq!(decoded, "hello båstad ");
     }
 
@@ -404,7 +404,7 @@ mod tests {
     #[test]
     fn decode_realistic() {
         let tokenizer = Tokenizer::new();
-        let decoded = tokenizer.decode(&[320, 2533, 6765, 320, 10297].map(Token));
+        let decoded = tokenizer.decode([320, 2533, 6765, 320, 10297].map(Token));
         assert_eq!(decoded, "a person riding a motorcycle ");
     }
 
@@ -425,7 +425,7 @@ mod tests {
     fn decode_long_word() {
         let tokenizer = Tokenizer::new();
         let decoded = tokenizer.decode(
-            &[
+            [
                 1067, 627, 1880, 16680, 13731, 1021, 778, 4810, 2290, 619, 10279, 45588, 83, 909,
                 688, 529, 42787, 978, 6522, 83, 1298,
             ]
@@ -457,7 +457,7 @@ mod tests {
     #[test]
     fn decode_start_and_end_of_text() {
         let tokenizer = Tokenizer::new();
-        let decoded = tokenizer.decode(&[49406, 1883, 49406, 10635, 12021, 49407].map(Token));
+        let decoded = tokenizer.decode([49406, 1883, 49406, 10635, 12021, 49407].map(Token));
         assert_eq!(
             decoded,
             "<start_of_text>hi <start_of_text>instant labs <end_of_text>"
