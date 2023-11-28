@@ -15,12 +15,18 @@ required-features = ["openai-vocabulary-file"]
 
 [dependencies]
 ahash = "0.8.6"
+ndarray = { version = "0.15.6", optional = true }
 regex = "1.10.2"
 
 [dev-dependencies]
 criterion = "0.5.1"
 
 [[bench]]
-name = "bench"
+name = "encode"
 required-features = ["openai-vocabulary-file"]
+harness = false
+
+[[bench]]
+name = "tokenize_batch"
+required-features = ["ndarray", "openai-vocabulary-file"]
 harness = false

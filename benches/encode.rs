@@ -53,5 +53,5 @@ fn long_sentence(c: &mut Criterion) {
     });
 }
 
-criterion_group!(benches, short, realistic, long_word, long_sentence);
-criterion_main!(benches);
+criterion_group!(encode, short, realistic, long_word, long_sentence);
+criterion_main!(encode);
