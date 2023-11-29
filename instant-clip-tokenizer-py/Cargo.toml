@@ -1,0 +1,16 @@
+[package]
+name = "instant-clip-tokenizer-py"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.65"
+license = "MIT"
+readme = "../README.md"
+
+[lib]
+name = "instant_clip_tokenizer"
+crate-type = ["cdylib"]
+
+[dependencies]
+instant-clip-tokenizer = { version = "0.1", features = ["ndarray"], path = "../instant-clip-tokenizer" }
+numpy = "0.20"
+pyo3 = { version = "0.20.0", features = ["extension-module"] }

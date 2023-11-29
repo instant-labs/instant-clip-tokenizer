@@ -1,32 +1,3 @@
-[package]
-name = "instant-clip-tokenizer"
-version = "0.1.0"
-edition = "2021"
-rust-version = "1.65"
-license = "MIT"
-
-[features]
-default = ["openai-vocabulary-file"]
-openai-vocabulary-file = []
-
-[[example]]
-name = "tokenize"
-required-features = ["openai-vocabulary-file"]
-
-[dependencies]
-ahash = "0.8.6"
-ndarray = { version = "0.15.6", optional = true }
-regex = "1.10.2"
-
-[dev-dependencies]
-criterion = "0.5.1"
-
-[[bench]]
-name = "encode"
-required-features = ["openai-vocabulary-file"]
-harness = false
-
-[[bench]]
-name = "tokenize_batch"
-required-features = ["ndarray", "openai-vocabulary-file"]
-harness = false
+[workspace]
+members = ["instant-clip-tokenizer", "instant-clip-tokenizer-py"]
+resolver = "2"
