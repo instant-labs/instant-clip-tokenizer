@@ -3,7 +3,9 @@
 //!
 //! It is intended to be a fast replacement for the original Python-based
 //! tokenizer included in the CLIP repository, aiming for 100% compatibility
-//! with the original implementation.
+//! with the original implementation. It can also be used with
+//! [OpenCLIP](https://github.com/mlfoundations/open_clip) and other
+//! implementations using the same tokenizer.
 //!
 //! # Examples
 //!
@@ -80,6 +82,9 @@ impl Tokenizer {
     ///
     /// The resulting `Tokenizer` is suitable for use with the original CLIP
     /// model.
+    ///
+    /// Note that creating a new `Tokenizer` is expensive, so it is recommended
+    /// to create the `Tokenizer` once and then reuse it.
     #[cfg(any(test, feature = "openai-vocabulary-file"))]
     pub fn new() -> Tokenizer {
         static VOCABULARY_DATA: &str = include_str!("../../bpe_simple_vocab_16e6.txt");
@@ -92,6 +97,9 @@ impl Tokenizer {
     ///
     /// The data must be in the format used by the original CLIP tokenizer
     /// implementation from OpenAI.
+    ///
+    /// Note that creating a new `Tokenizer` is expensive, so it is recommended
+    /// to create the `Tokenizer` once and then reuse it.
     ///
     /// # Errors
     ///

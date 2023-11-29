@@ -25,6 +25,9 @@ impl Tokenizer {
     ///
     /// The resulting `Tokenizer` is suitable for use with the original CLIP
     /// model.
+    ///
+    /// Note that creating a new `Tokenizer` is expensive, so it is recommended
+    /// to create the `Tokenizer` once and then reuse it.
     #[new]
     fn new() -> Self {
         Tokenizer {
@@ -37,6 +40,9 @@ impl Tokenizer {
     ///
     /// The data must be in the format used by the original CLIP tokenizer
     /// implementation from OpenAI.
+    ///
+    /// Note that creating a new `Tokenizer` is expensive, so it is recommended
+    /// to create the `Tokenizer` once and then reuse it.
     #[staticmethod]
     fn load(filename: &str, max_vocabulary_size: u16) -> PyResult<Self> {
         Ok(Self {
