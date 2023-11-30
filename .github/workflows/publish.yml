@@ -51,7 +51,7 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
-          working-directory: instant-segment-py
+          working-directory: instant-clip-tokenizer-py
           target: ${{ matrix.target }}
           args: --release --out ../dist --find-interpreter
           sccache: 'true'
