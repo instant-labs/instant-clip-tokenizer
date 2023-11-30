@@ -1,10 +1,13 @@
 [package]
 name = "instant-clip-tokenizer-py"
 version = "0.1.0"
-edition = "2021"
-rust-version = "1.65"
-license = "MIT"
-readme = "../README.md"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description.workspace = true
+homepage.workspace = true
+repository.workspace = true
+readme.workspace = true
 
 [lib]
 name = "instant_clip_tokenizer"
