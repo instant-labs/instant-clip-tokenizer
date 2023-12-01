@@ -1,12 +1,11 @@
-# Validate `instant-clip-tokenizer-py` by comparing its output with the original
-# tokenizer on a large dataset.
+# Validate `instant-clip-tokenizer-py` by comparing its output with the original tokenizer on a
+# large dataset.
 #
-# This script requires one command line argument, the filename of the data file
-# to be used. The data file must be `.tsv` format with the strings to be used
-# for validation in the first column.
+# This script requires one command line argument, the filename of the data file to be used. The data
+# file must be `.tsv` format with the strings to be used for validation in the first column.
 #
-# It is recommended to use this with Google's Conceptual Captions dataset
-# (containing ~3.3M image captions), which can be downloaded here:
+# It is recommended to use this with Google's Conceptual Captions dataset (containing ~3.3M image
+# captions), which can be downloaded here:
 # https://ai.google.com/research/ConceptualCaptions/download
 
 import html
