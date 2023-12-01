@@ -1,17 +1,14 @@
-//! This crate provides a text tokenizer for [OpenAI's CLIP
-//! model](https://github.com/openai/CLIP).
+//! This crate provides a text tokenizer for [OpenAI's CLIP model](https://github.com/openai/CLIP).
 //!
-//! It is intended to be a fast replacement for the original Python-based
-//! tokenizer included in the CLIP repository, aiming for 100% compatibility
-//! with the original implementation. It can also be used with
-//! [OpenCLIP](https://github.com/mlfoundations/open_clip) and other
-//! implementations using the same tokenizer.
+//! It is intended to be a fast replacement for the original Python-based tokenizer included in the
+//! CLIP repository, aiming for 100% compatibility with the original implementation. It can also be
+//! used with [OpenCLIP](https://github.com/mlfoundations/open_clip) and other implementations using
+//! the same tokenizer.
 //!
 //! # Examples
 //!
-//! Basic usage with the bundled vocabulary data suitable for OpenAI's CLIP
-//! model (requires the `openai-vocabulary-file` [crate
-//! feature](#crate-features)):
+//! Basic usage with the bundled vocabulary data suitable for OpenAI's CLIP model (requires the
+//! `openai-vocabulary-file` [crate feature](#crate-features)):
 //!
 //! ```
 //! # use instant_clip_tokenizer::{Token, Tokenizer};
@@ -45,19 +42,16 @@
 //!
 //! This crate provides two features:
 //!
-//! * **ndarray** - Enables the [`ndarray`](https://docs.rs/ndarray) dependency
-//!   and the `Tokenizer::tokenize_batch` method that can be used to tokenize
-//!   several input strings at once, returning a matrix suitable for directly
-//!   passing to the CLIP neural network.
-//! * **openai-vocabulary-file** - This feature bundles the default vocabulary
-//!   file used for OpenAI's CLIP model together with this crate and allows
-//!   users to construct a new tokenizer simply by calling [`Tokenizer::new`].
-//!   When disabled, you will need to supply your own vocabulary file and
-//!   construct the tokenizer using [`Tokenizer::with_vocabulary`].
+//! * **ndarray** - Enables the [`ndarray`](https://docs.rs/ndarray) dependency and the
+//!   `Tokenizer::tokenize_batch` method that can be used to tokenize several input strings at once,
+//!   returning a matrix suitable for directly passing to the CLIP neural network.
+//! * **openai-vocabulary-file** - This feature bundles the default vocabulary file used for
+//!   OpenAI's CLIP model together with this crate and allows users to construct a new tokenizer
+//!   simply by calling [`Tokenizer::new`]. When disabled, you will need to supply your own
+//!   vocabulary file and construct the tokenizer using [`Tokenizer::with_vocabulary`].
 //!
-//! The **openai-vocabulary-file** feature is enabled by default. To disable it
-//! use `default-features = false` when specifying the dependency on this crate
-//! in your `Cargo.toml`.
+//! The **openai-vocabulary-file** feature is enabled by default. To disable it use
+//! `default-features = false` when specifying the dependency on this crate in your `Cargo.toml`.
 
 use std::io::{self, BufRead};
 
@@ -77,14 +71,12 @@ pub struct Tokenizer {
 }
 
 impl Tokenizer {
-    /// Create a new `Tokenizer` using the vocabulary data bundled with this
-    /// crate.
+    /// Create a new `Tokenizer` using the vocabulary data bundled with this crate.
     ///
-    /// The resulting `Tokenizer` is suitable for use with the original CLIP
-    /// model.
+    /// The resulting `Tokenizer` is suitable for use with the original CLIP model.
     ///
-    /// Note that creating a new `Tokenizer` is expensive, so it is recommended
-    /// to create the `Tokenizer` once and then reuse it.
+    /// Note that creating a new `Tokenizer` is expensive, so it is recommended to create the
+    /// `Tokenizer` once and then reuse it.
     #[cfg(any(test, feature = "openai-vocabulary-file"))]
     pub fn new() -> Tokenizer {
         static VOCABULARY_DATA: &str = include_str!("../bpe_simple_vocab_16e6.txt");
@@ -95,16 +87,15 @@ impl Tokenizer {
 
     /// Create a new `Tokenizer` by reading the vocabulary data from `reader`.
     ///
-    /// The data must be in the format used by the original CLIP tokenizer
-    /// implementation from OpenAI.
+    /// The data must be in the format used by the original CLIP tokenizer implementation from
+    /// OpenAI.
     ///
-    /// Note that creating a new `Tokenizer` is expensive, so it is recommended
-    /// to create the `Tokenizer` once and then reuse it.
+    /// Note that creating a new `Tokenizer` is expensive, so it is recommended to create the
+    /// `Tokenizer` once and then reuse it.
     ///
     /// # Errors
     ///
-    /// If the data format is incorrect or reading from `reader` fails, then an
-    /// error is returned.
+    /// If the data format is incorrect or reading from `reader` fails, then an error is returned.
     pub fn with_vocabulary(
         reader: impl BufRead,
         max_vocabulary_size: u16,
@@ -141,9 +132,9 @@ impl Tokenizer {
             token_index += 1;
         }
 
-        // For every increment of `token_index` above we actually also added the
-        // corresponding end-of-word token, so we have to double `token_index`
-        // now in order for it to be correct again.
+        // For every increment of `token_index` above we actually also added the corresponding
+        // end-of-word token, so we have to double `token_index` now in order for it to be correct
+        // again.
         token_index *= 2;
 
         let mut merge_rules = AHashMap::default();
@@ -175,8 +166,8 @@ impl Tokenizer {
             token_index += 1;
         }
 
-        // Note that the values we store in `decoder` are not necessarily valid
-        // UTF-8, so we have to use `Vec<u8>` for them.
+        // Note that the values we store in `decoder` are not necessarily valid UTF-8, so we have to
+        // use `Vec<u8>` for them.
         let decoder = string_to_token
             .into_iter()
             .map(|(string, token)| (token, string.chars().map(|ch| byte_decoder[&ch]).collect()))
@@ -205,22 +196,19 @@ impl Tokenizer {
 
     /// Tokenize a batch of multiple input strings.
     ///
-    /// Each given input string is encoded using the [`encode`] method and the
-    /// numeric representation written to a row in the resulting two-dimensional
-    /// matrix of shape `(texts.len(), context_length)`, with the special
-    /// `<start_of_text>` token prepended, and `<end_of_text>` appended to each
-    /// text.
+    /// Each given input string is encoded using the [`encode`] method and the numeric
+    /// representation written to a row in the resulting two-dimensional matrix of shape
+    /// `(texts.len(), context_length)`, with the special `<start_of_text>` token prepended, and
+    /// `<end_of_text>` appended to each text.
     ///
-    /// The individual input strings are lowercased before being tokenized, but
-    /// otherwise no pre-processing is performed.
+    /// The individual input strings are lowercased before being tokenized, but otherwise no
+    /// pre-processing is performed.
     ///
-    /// `context_length` is the maximum number of tokens per each text and
-    /// should be `77` for all current CLIP models. If tokenization results in
-    /// less than `context_length` tokens the resulting row will be padded with
-    /// trailing zeros. If tokenizing an input text results in too many tokens,
-    /// the token sequence will be truncated to fit within the resulting row of
-    /// length `context_length`, always including the `<start_of_text>` and
-    /// `<end_of_text>` marker tokens.
+    /// `context_length` is the maximum number of tokens per each text and should be `77` for all
+    /// current CLIP models. If tokenization results in less than `context_length` tokens the
+    /// resulting row will be padded with trailing zeros. If tokenizing an input text results in too
+    /// many tokens, the token sequence will be truncated to fit within the resulting row of length
+    /// `context_length`, always including the `<start_of_text>` and `<end_of_text>` marker tokens.
     ///
     /// The resulting matrix can be passed directly to the CLIP neural network.
     ///
@@ -269,13 +257,12 @@ impl Tokenizer {
 
     /// Encode a `text` input as a sequence of tokens.
     ///
-    /// The resulting tokens are appended to `out`. `text` is lowercased before
-    /// being tokenized, but otherwise no pre-processing is performed.
+    /// The resulting tokens are appended to `out`. `text` is lowercased before being tokenized, but
+    /// otherwise no pre-processing is performed.
     ///
-    /// The encoded token sequence does not include the special
-    /// `<start_of_text>` and `<end_of_text>` marker tokens. When these are
-    /// needed you can either use the `tokenize_batch` method instead, or add
-    /// them manually by using the [`start_of_text`] and [`end_of_text`]
+    /// The encoded token sequence does not include the special `<start_of_text>` and
+    /// `<end_of_text>` marker tokens. When these are needed you can either use the `tokenize_batch`
+    /// method instead, or add them manually by using the [`start_of_text`] and [`end_of_text`]
     /// methods, as in the example below.
     ///
     /// [`start_of_text`]: Tokenizer::start_of_text
@@ -312,8 +299,7 @@ impl Tokenizer {
                     .map(|b| self.byte_to_token[usize::from(*b)]),
             );
             if start_index < out.len() {
-                // If we added anything, mark last character as end-of-word
-                // token
+                // If we added anything, mark last character as end-of-word token
                 out.last_mut().unwrap().0 += 256;
             }
             self.apply_merge_rules(start_index, out);
@@ -350,11 +336,10 @@ impl Tokenizer {
 
     /// Convert a sequence of `tokens` back to a textual representation.
     ///
-    /// Due to the way whitespace and lowercasing is handled a sequence of
-    /// tokens will not always be decoded back to the exact same text that
-    /// `encode` was called with, in other words, `decode(encode(text)) == text`
-    /// does not always hold true. Hence, this function is mostly useful for
-    /// debugging purposes.
+    /// Due to the way whitespace and lowercasing is handled a sequence of tokens will not always be
+    /// decoded back to the exact same text that `encode` was called with, in other words,
+    /// `decode(encode(text)) == text` does not always hold true. Hence, this function is mostly
+    /// useful for debugging purposes.
     ///
     /// # Examples
     ///
@@ -386,8 +371,7 @@ impl Tokenizer {
 
     /// Returns the special `<start_of_text>` marker token.
     ///
-    /// See [`encode`] for an example about how to add this token to a token
-    /// sequence.
+    /// See [`encode`] for an example about how to add this token to a token sequence.
     ///
     /// [`encode`]: Tokenizer::encode
     pub fn start_of_text(&self) -> Token {
@@ -396,8 +380,7 @@ impl Tokenizer {
 
     /// Returns the special `<end_of_text>` marker token.
     ///
-    /// See [`encode`] for an example about how to add this token to a token
-    /// sequence.
+    /// See [`encode`] for an example about how to add this token to a token sequence.
     ///
     /// [`encode`]: Tokenizer::encode
     pub fn end_of_text(&self) -> Token {
@@ -414,9 +397,9 @@ impl Default for Tokenizer {
 
 /// Represents a single token.
 ///
-/// Values of this type can only be produced by calls to methods on the
-/// [`Tokenizer`] type, mainly [`Tokenizer::encode`]. To input tokens into an
-/// actual neural network the [`to_u16`] method should be used.
+/// Values of this type can only be produced by calls to methods on the [`Tokenizer`] type, mainly
+/// [`Tokenizer::encode`]. To input tokens into an actual neural network the [`to_u16`] method
+/// should be used.
 ///
 /// [`to_u16`]: Token::to_u16
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -540,11 +523,10 @@ mod tests {
     #[test]
     fn encode_start_and_end_of_text_with_special_char() {
         let tokens = encode("<start_of_text>Hi!<end_of_text>");
-        // Note how the "<end_of_text>" substring is not encoded as the special
-        // marker token (which would be 49407), because the word-splitting regex
-        // does not split it as a separate word due to the exclamation mark
-        // preceeding it. This behavior is somewhat strange, but we preserve it
-        // in order to stay compatible with the original Python implementation.
+        // Note how the "<end_of_text>" substring is not encoded as the special marker token (which
+        // would be 49407), because the word-splitting regex does not split it as a separate word
+        // due to the exclamation mark preceeding it. This behavior is somewhat strange, but we
+        // preserve it in order to stay compatible with the original Python implementation.
         assert_eq!(
             tokens,
             [49406, 1883, 0, 283, 806, 318, 539, 318, 4160, 285].map(Token)

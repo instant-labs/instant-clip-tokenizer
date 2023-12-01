@@ -20,14 +20,12 @@ struct Tokenizer {
 
 #[pymethods]
 impl Tokenizer {
-    /// Create a new `Tokenizer` using the vocabulary data bundled with this
-    /// library.
+    /// Create a new `Tokenizer` using the vocabulary data bundled with this library.
     ///
-    /// The resulting `Tokenizer` is suitable for use with the original CLIP
-    /// model.
+    /// The resulting `Tokenizer` is suitable for use with the original CLIP model.
     ///
-    /// Note that creating a new `Tokenizer` is expensive, so it is recommended
-    /// to create the `Tokenizer` once and then reuse it.
+    /// Note that creating a new `Tokenizer` is expensive, so it is recommended to create the
+    /// `Tokenizer` once and then reuse it.
     #[new]
     fn new() -> Self {
         Tokenizer {
@@ -35,14 +33,13 @@ impl Tokenizer {
         }
     }
 
-    /// Create a new `Tokenizer` by reading the vocabulary data from the given
-    /// filename.
+    /// Create a new `Tokenizer` by reading the vocabulary data from the given filename.
     ///
-    /// The data must be in the format used by the original CLIP tokenizer
-    /// implementation from OpenAI.
+    /// The data must be in the format used by the original CLIP tokenizer implementation from
+    /// OpenAI.
     ///
-    /// Note that creating a new `Tokenizer` is expensive, so it is recommended
-    /// to create the `Tokenizer` once and then reuse it.
+    /// Note that creating a new `Tokenizer` is expensive, so it is recommended to create the
+    /// `Tokenizer` once and then reuse it.
     #[staticmethod]
     fn load(filename: &str, max_vocabulary_size: u16) -> PyResult<Self> {
         Ok(Self {
@@ -55,22 +52,20 @@ impl Tokenizer {
 
     /// Tokenize one or multiple input strings.
     ///
-    /// Each given input string is encoded using the `encode` method and the
-    /// numeric representation written to a row in the resulting two-dimensional
-    /// numpy array of shape `(len(texts), context_length)`, with the special
-    /// `<start_of_text>` token prepended, and `<end_of_text>` appended to each
-    /// text.
+    /// Each given input string is encoded using the `encode` method and the numeric representation
+    /// written to a row in the resulting two-dimensional numpy array of shape `(len(texts),
+    /// context_length)`, with the special `<start_of_text>` token prepended, and `<end_of_text>`
+    /// appended to each text.
     ///
-    /// The individual input strings are lowercased before being tokenized, but
-    /// otherwise no pre-processing is performed.
+    /// The individual input strings are lowercased before being tokenized, but otherwise no
+    /// pre-processing is performed.
     ///
-    /// `context_length` is the maximum number of tokens per each text and
-    /// defaults to `77` which is the correct value for all current CLIP models.
-    /// If tokenization results in less than `context_length` tokens the
-    /// resulting row will be padded with trailing zeros. If tokenizing an input
-    /// text results in too many tokens, the token sequence will be truncated to
-    /// fit within the resulting row of length `context_length`, always
-    /// including the `<start_of_text>` and `<end_of_text>` marker tokens.
+    /// `context_length` is the maximum number of tokens per each text and defaults to `77` which is
+    /// the correct value for all current CLIP models. If tokenization results in less than
+    /// `context_length` tokens the resulting row will be padded with trailing zeros. If tokenizing
+    /// an input text results in too many tokens, the token sequence will be truncated to fit within
+    /// the resulting row of length `context_length`, always including the `<start_of_text>` and
+    /// `<end_of_text>` marker tokens.
     ///
     /// The resulting array can be passed directly to the CLIP neural network.
     fn tokenize_batch<'py>(
@@ -92,11 +87,9 @@ impl Tokenizer {
 
     /// Encode a `text` input as a sequence of tokens.
     ///
-    /// The encoded token sequence does not include the special
-    /// `<start_of_text>` and `<end_of_text>` marker tokens. When these are
-    /// needed you can either use the `tokenize_batch` method instead, or add
-    /// them manually by using the `start_of_text` and `end_of_text`
-    /// methods.
+    /// The encoded token sequence does not include the special `<start_of_text>` and
+    /// `<end_of_text>` marker tokens. When these are needed you can either use the `tokenize_batch`
+    /// method instead, or add them manually by using the `start_of_text` and `end_of_text` methods.
     fn encode(&self, text: &str) -> Vec<u16> {
         let mut tokens = Vec::with_capacity(text.len());
         self.inner.encode(text, &mut tokens);
@@ -108,11 +101,10 @@ impl Tokenizer {
 
     /// Convert a sequence of `tokens` back to a textual representation.
     ///
-    /// Due to the way whitespace and lowercasing is handled a sequence of
-    /// tokens will not always be decoded back to the exact same text that
-    /// `encode` was called with, in other words, `decode(encode(text)) == text`
-    /// does not always hold true. Hence, this function is mostly useful for
-    /// debugging purposes.
+    /// Due to the way whitespace and lowercasing is handled a sequence of tokens will not always be
+    /// decoded back to the exact same text that `encode` was called with, in other words,
+    /// `decode(encode(text)) == text` does not always hold true. Hence, this function is mostly
+    /// useful for debugging purposes.
     fn decode(&self, tokens: Vec<u16>) -> PyResult<String> {
         let tokens = tokens
             .into_iter()
