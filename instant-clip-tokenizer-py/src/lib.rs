@@ -4,10 +4,11 @@ use std::io::BufReader;
 use numpy::{IntoPyArray, PyArray2};
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
+use pyo3::pybacked::PyBackedStr;
 
 #[pymodule]
 #[pyo3(name = "instant_clip_tokenizer")]
-fn instant_clip_tokenizer_py(_py: Python, m: &PyModule) -> PyResult<()> {
+fn instant_clip_tokenizer_py(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<Tokenizer>()?;
     Ok(())
 }
@@ -73,16 +74,18 @@ impl Tokenizer {
         py: Python<'py>,
         input: TokenizeBatchInput,
         context_length: Option<usize>,
-    ) -> PyResult<&'py PyArray2<u16>> {
+    ) -> PyResult<Bound<'py, PyArray2<u16>>> {
         let context_length = context_length.unwrap_or(77);
         if context_length < 3 {
             return Err(PyValueError::new_err("context_length is less than 3"));
         }
         let result = match input {
-            TokenizeBatchInput::Single(text) => self.inner.tokenize_batch([text], context_length),
-            TokenizeBatchInput::Multiple(texts) => self.inner.tokenize_batch(texts, context_length),
+            TokenizeBatchInput::Single(text) => self.inner.tokenize_batch([&*text], context_length),
+            TokenizeBatchInput::Multiple(texts) => self
+                .inner
+                .tokenize_batch(texts.iter().map(|s| &**s), context_length),
         };
-        Ok(result.into_pyarray(py))
+        Ok(result.into_pyarray_bound(py))
     }
 
     /// Encode a `text` input as a sequence of tokens.
@@ -128,9 +131,9 @@ impl Tokenizer {
 }
 
 #[derive(FromPyObject)]
-enum TokenizeBatchInput<'a> {
+enum TokenizeBatchInput {
     #[pyo3(transparent, annotation = "str")]
-    Single(&'a str),
+    Single(PyBackedStr),
     #[pyo3(transparent, annotation = "list[str]")]
-    Multiple(Vec<&'a str>),
+    Multiple(Vec<PyBackedStr>),
 }
