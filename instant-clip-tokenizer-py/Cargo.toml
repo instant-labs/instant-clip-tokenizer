@@ -16,4 +16,4 @@ crate-type = ["cdylib"]
 [dependencies]
 instant-clip-tokenizer = { version = "0.1", features = ["ndarray"], path = "../instant-clip-tokenizer" }
 numpy = "0.21"
-pyo3 = { version = "0.21", features = ["extension-module"] }
+pyo3 = { version = "0.22", features = ["extension-module"] }
